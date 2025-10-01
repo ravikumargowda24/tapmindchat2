@@ -50,12 +50,12 @@ const setupSocket = (server) => {
   const handleTyping = (data) => {
     const { userId, recipientId, isTyping } = data;
     const recipientSocketId = userSocketMap.get(recipientId);
-    
+
     if (recipientSocketId) {
       if (isTyping) {
         typingUsers.set(userId, { recipientId, timestamp: Date.now() });
         io.to(recipientSocketId).emit("user-typing", { userId, isTyping: true });
-        
+
         // Auto-stop typing after 3 seconds
         setTimeout(() => {
           if (typingUsers.has(userId)) {
@@ -261,7 +261,7 @@ const setupSocket = (server) => {
 
   const handleAddMembersToChannel = async (data) => {
     const { channelId, newMembers, addedBy } = data;
-    
+
     try {
       const channel = await Channel.findById(channelId).populate("members");
       if (channel && channel.members) {
@@ -284,7 +284,7 @@ const setupSocket = (server) => {
 
   const handleRemoveMemberFromChannel = async (data) => {
     const { channelId, removedMemberId, removedBy } = data;
-    
+
     try {
       const channel = await Channel.findById(channelId).populate("members");
       if (channel && channel.members) {
@@ -299,7 +299,7 @@ const setupSocket = (server) => {
             });
           }
         });
-        
+
         // Notify the removed member
         const removedMemberSocketId = userSocketMap.get(removedMemberId);
         if (removedMemberSocketId) {
@@ -316,7 +316,7 @@ const setupSocket = (server) => {
 
   const handleDeleteChannel = async (data) => {
     const { channelId, deletedBy } = data;
-    
+
     try {
       const channel = await Channel.findById(channelId).populate("members");
       if (channel && channel.members) {
@@ -364,7 +364,7 @@ const setupSocket = (server) => {
     socket.on("send-channel-message", sendChannelMessage);
     socket.on("delete-message", deleteMessageSocket);
     socket.on("edit-message", editMessageSocket);
-    
+
     // Group management socket events
     socket.on("add-members-to-channel", handleAddMembersToChannel);
     socket.on("remove-member-from-channel", handleRemoveMemberFromChannel);

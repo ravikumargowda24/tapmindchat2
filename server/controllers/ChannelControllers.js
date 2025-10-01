@@ -38,7 +38,10 @@ export const getUserChannels = async (req, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId);
     const channels = await Channel.find({
       $or: [{ admin: userId }, { members: userId }],
-    }).sort({ updatedAt: -1 });
+    })
+      .populate("admin", "firstName lastName email image color")
+      .populate("members", "firstName lastName email image color")
+      .sort({ updatedAt: -1 });
 
     return res.status(200).json({ channels });
   } catch (error) {
@@ -96,7 +99,7 @@ export const addMembersToChannel = async (req, res) => {
     // Add new members (avoid duplicates)
     const existingMemberIds = channel.members.map(member => member.toString());
     const newMemberIds = memberIds.filter(id => !existingMemberIds.includes(id));
-    
+
     if (newMemberIds.length === 0) {
       return res.status(400).json({ message: "All selected users are already members" });
     }
@@ -109,9 +112,9 @@ export const addMembersToChannel = async (req, res) => {
       .populate("members", "firstName lastName email image color")
       .populate("admin", "firstName lastName email image color");
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       message: "Members added successfully",
-      channel: updatedChannel 
+      channel: updatedChannel
     });
   } catch (error) {
     console.error("Error adding members to channel:", error);

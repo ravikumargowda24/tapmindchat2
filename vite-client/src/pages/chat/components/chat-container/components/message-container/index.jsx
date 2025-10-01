@@ -411,10 +411,10 @@ const MessageContainer = () => {
                         <span>
                             {message.content}
                             {message.forwarded && (
-                                <span className="text-xs text-blue-400 ml-1">(forwarded)</span>
+                                <span className="text-xs text-blue-400 ml-1">(forward)</span>
                             )}
                             {message.edited && (
-                                <span className="text-xs text-gray-400 ml-1">(edited)</span>
+                                <span className="text-xs text-gray-400 ml-1">(edit)</span>
                             )}
                         </span>
                     )}
@@ -499,10 +499,10 @@ const MessageContainer = () => {
                             <span>
                                 {message.content}
                                 {message.forwarded && (
-                                    <span className="text-xs text-blue-400 ml-1">(forwarded)</span>
+                                    <span className="text-xs text-blue-400 ml-1">(forward)</span>
                                 )}
                                 {message.edited && (
-                                    <span className="text-xs text-gray-400 ml-1">(edited)</span>
+                                    <span className="text-xs text-gray-400 ml-1">(edit)</span>
                                 )}
                             </span>
                         )}

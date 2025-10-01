@@ -8,6 +8,9 @@ import moment from "moment";
 import { useEffect, useState, useRef } from "react";
 import apiClient from "@/lib/api-client";
 import { GET_USER_STATUS_ROUTE } from "@/lib/constants";
+import AddMembersModal from "./add-members-modal";
+import RemoveMembersModal from "./remove-members-modal";
+import ViewMembersModal from "./view-members-modal";
 
 const ChatHeader = () => {
     const {
@@ -15,12 +18,17 @@ const ChatHeader = () => {
         closeChat,
         selectedChatType,
         userStatus,
-        typingUsers
+        typingUsers,
+        userInfo
     } = useAppStore();
 
     const [userStatusData, setUserStatusData] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [addMembersModalOpen, setAddMembersModalOpen] = useState(false);
+    const [removeMembersModalOpen, setRemoveMembersModalOpen] = useState(false);
+    const [viewMembersModalOpen, setViewMembersModalOpen] = useState(false);
     const dropdownRef = useRef(null);
+
 
     // Fetch user status
     useEffect(() => {
@@ -120,12 +128,17 @@ const ChatHeader = () => {
     };
 
     const handleAddMember = () => {
-        console.log("Add Member");
+        setAddMembersModalOpen(true);
         setDropdownOpen(false);
     };
 
     const handleRemoveMember = () => {
-        console.log("Remove Member");
+        setRemoveMembersModalOpen(true);
+        setDropdownOpen(false);
+    };
+
+    const handleViewMembers = () => {
+        setViewMembersModalOpen(true);
         setDropdownOpen(false);
     };
 
@@ -193,6 +206,7 @@ const ChatHeader = () => {
                     <div className="absolute right-0 top-full mt-2 bg-white text-black  rounded-md shadow-md w-48 z-50">
                         {selectedChatType === "contact" && (
                             <button
+                                disabled
                                 onClick={handleDelete}
                                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                             >
@@ -203,23 +217,34 @@ const ChatHeader = () => {
                         {selectedChatType === "channel" && (
                             <>
                                 <button
-                                    onClick={handleDelete}
+                                    onClick={handleViewMembers}
                                     className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                                 >
-                                    Delete Channel
+                                    View Members
                                 </button>
-                                <button
-                                    onClick={handleAddMember}
-                                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                >
-                                    Add Member
-                                </button>
-                                <button
-                                    onClick={handleRemoveMember}
-                                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                >
-                                    Remove Member
-                                </button>
+                                {selectedChatData.admin._id == userInfo.id && (
+                                    <>
+                                        <button
+                                            disabled
+                                            onClick={handleDelete}
+                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                        >
+                                            Delete Channel
+                                        </button>
+                                        <button
+                                            onClick={handleAddMember}
+                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                        >
+                                            Add Member
+                                        </button>
+                                        <button
+                                            onClick={handleRemoveMember}
+                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                        >
+                                            Remove Member
+                                        </button>
+                                    </>
+                                )}
                             </>
                         )}
                     </div>
@@ -232,6 +257,27 @@ const ChatHeader = () => {
                     <RiCloseFill className="text-3xl cursor-pointer" />
                 </button>
             </div>
+
+            {/* Add Members Modal */}
+            <AddMembersModal
+                isOpen={addMembersModalOpen}
+                onClose={() => setAddMembersModalOpen(false)}
+                channel={selectedChatData}
+            />
+
+            {/* Remove Members Modal */}
+            <RemoveMembersModal
+                isOpen={removeMembersModalOpen}
+                onClose={() => setRemoveMembersModalOpen(false)}
+                channel={selectedChatData}
+            />
+
+            {/* View Members Modal */}
+            <ViewMembersModal
+                isOpen={viewMembersModalOpen}
+                onClose={() => setViewMembersModalOpen(false)}
+                channel={selectedChatData}
+            />
         </div>
     );
 };

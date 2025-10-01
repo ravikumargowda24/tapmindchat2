@@ -165,4 +165,81 @@ export const createChatSlice = (set, get) => ({
             console.error('Error marking as read:', error);
         }
     },
+
+    // Channel member management functions
+    addMembersToChannel: async (channelId, memberIds) => {
+        const { channels } = get();
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/channel/${channelId}/add-members`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ memberIds }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                // Update local channel state
+                const updatedChannels = channels.map(channel =>
+                    channel._id === channelId
+                        ? { ...channel, members: result.channel.members }
+                        : channel
+                );
+                set({ channels: updatedChannels });
+                return { success: true, channel: result.channel };
+            } else {
+                const error = await response.json();
+                return { success: false, error: error.message };
+            }
+        } catch (error) {
+            console.error('Error adding members to channel:', error);
+            return { success: false, error: 'Failed to add members' };
+        }
+    },
+
+    removeMemberFromChannel: async (channelId, memberId) => {
+        const { channels } = get();
+        try {
+            const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/channel/${channelId}/remove-member`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({ memberId }),
+            });
+
+            if (response.ok) {
+                // Update local channel state by removing the member
+                const updatedChannels = channels.map(channel =>
+                    channel._id === channelId
+                        ? {
+                            ...channel,
+                            members: channel.members.filter(member => member._id !== memberId)
+                        }
+                        : channel
+                );
+                set({ channels: updatedChannels });
+                return { success: true };
+            } else {
+                const error = await response.json();
+                return { success: false, error: error.message };
+            }
+        } catch (error) {
+            console.error('Error removing member from channel:', error);
+            return { success: false, error: 'Failed to remove member' };
+        }
+    },
+
+    updateChannelMembers: (channelId, newMembers) => {
+        const { channels } = get();
+        const updatedChannels = channels.map(channel =>
+            channel._id === channelId
+                ? { ...channel, members: newMembers }
+                : channel
+        );
+        set({ channels: updatedChannels });
+    },
 });
