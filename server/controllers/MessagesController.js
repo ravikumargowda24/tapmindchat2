@@ -61,7 +61,7 @@ export const forwardMessage = async (req, res, next) => {
     // Forward to individual contacts
     if (recipients && recipients.length > 0) {
       for (const recipientId of recipients) {
-        const newMessage = new Message({
+        const messageData = {
           sender: userId,
           recipient: recipientId,
           content: originalMessage.content,
@@ -70,13 +70,7 @@ export const forwardMessage = async (req, res, next) => {
           timestamp: new Date(),
           forwarded: true,
           originalMessageId: messageId
-        });
-
-        const savedMessage = await newMessage.save();
-        const messageData = await Message.findById(savedMessage._id)
-          .populate("sender", "id email firstName lastName image color")
-          .populate("recipient", "id email firstName lastName image color")
-          .exec();
+        };
 
         forwardedMessages.push(messageData);
       }
@@ -88,7 +82,7 @@ export const forwardMessage = async (req, res, next) => {
         const channel = await Channel.findById(channelId);
         if (!channel) continue;
 
-        const newMessage = new Message({
+        const messageData = {
           sender: userId,
           recipient: null,
           content: originalMessage.content,
@@ -96,19 +90,11 @@ export const forwardMessage = async (req, res, next) => {
           fileUrl: originalMessage.fileUrl,
           timestamp: new Date(),
           forwarded: true,
-          originalMessageId: messageId
-        });
+          originalMessageId: messageId,
+          channelId
+        };
 
-        const savedMessage = await newMessage.save();
-        await Channel.findByIdAndUpdate(channelId, {
-          $push: { messages: savedMessage._id },
-        });
-
-        const messageData = await Message.findById(savedMessage._id)
-          .populate("sender", "id email firstName lastName image color")
-          .exec();
-
-        forwardedMessages.push({ ...messageData._doc, channelId });
+        forwardedMessages.push(messageData);
       }
     }
 
