@@ -388,7 +388,7 @@ const setupSocket = (server) => {
         }
       }
 
-      console.log(`Message ${messageId} marked as read by ${recipientId || readerId}`);
+      // console.log(`Message ${messageId} marked as read by ${recipientId || readerId}`);
     } catch (error) {
       console.error("Error handling message read:", error);
     }
@@ -408,13 +408,6 @@ const setupSocket = (server) => {
         });
       }
 
-      // Update unread count for the partner
-      io.to(partnerSocketId).emit("update-unread-count", {
-        chatId: userId,
-        chatType: "contact",
-        action: "clear", // Clear all unread messages for this chat
-      });
-
       console.log(`Chat ${chatId} marked as read by ${userId}`);
     } catch (error) {
       console.error("Error marking chat as read:", error);
@@ -423,7 +416,7 @@ const setupSocket = (server) => {
 
 
   const handleAddMembersToChannel = async (data) => {
-    const { channelId, newMembers, addedBy } = data;
+    const { channelId, newMembers, addedMembers, addedBy } = data;
 
     try {
       const channel = await Channel.findById(channelId).populate("members");
@@ -437,6 +430,14 @@ const setupSocket = (server) => {
               newMembers,
               addedBy
             });
+          }
+        });
+
+        // Notify new members to add the channel
+        addedMembers.forEach((memberId) => {
+          const memberSocketId = userSocketMap.get(memberId);
+          if (memberSocketId) {
+            io.to(memberSocketId).emit("new-channel-added", channel);
           }
         });
       }
